@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
-import connectDB from "../backend/config/db.js";
+import connectDB from "../server/config/db.js";
 
 import boardRouter from "./routes/boardRouter.js";
 import organizationRouter from "./routes/organizationRouter.js";

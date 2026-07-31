@@ -9,8 +9,9 @@ const NavBar = () => {
   const [profileOpen, setProfileOpen] = useState(false)
 
   return (
+    
     <div className="fixed top-4 left-0 right-0 z-50 w-full px-4">
-      <div className="max-w-4xl mx-auto h-16 bg-black/20  backdrop-blur-md border border-white/10 shadow-lg shadow-black/20 px-6 rounded-full flex items-center justify-between">
+      <div className="max-w-4xl mx-auto h-16 bg-black backdrop-blur-md border border-white/10 shadow-lg shadow-black/20 px-6 rounded-full flex items-center justify-between">
 
         {/* Left: logo */}
         <div className="flex items-center gap-3 shrink-0">

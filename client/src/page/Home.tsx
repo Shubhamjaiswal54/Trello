@@ -1,5 +1,9 @@
-import DotField from '@/components/DotField.jsx';
-import NavBar from '@/components/Navbar.jsx';
+import DotField from '@/components/DotField';
+import NavBar from '@/components/Navbar';
+import TextType from '@/components/TextType';
+// import { User } from 'lucide-react';
+import User from '@/page/user.tsx';
+
 
 // DotField is a JS component without TypeScript typings — cast to any for now
 // const DotFieldAny = DotField as any;
@@ -23,10 +27,32 @@ const Home = () => {
           gradientTo="#B497CF"
           glowColor="#120F17"
         />
+
+        <TextType
+
+          text={["hey there", "welcome to Trello", "organize your tasks with ease!"]}
+          typingSpeed={75}
+          pauseDuration={1500}
+          showCursor
+          cursorCharacter="_"
+          deletingSpeed={50}
+          variableSpeedEnabled={false}
+          variableSpeedMin={60}
+          variableSpeedMax={120}
+          cursorBlinkDuration={0.5}
+          style={{
+            position: 'absolute',
+            top: '25%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            fontSize: '2rem',
+            fontFamily: 'monospace',
+            color: 'black',
+
+          }}
+
+        />
       </div>
-
-      <div>Hey there , welcome to <span className='hero-title'>Trello</span></div>
-
     </>
 
 
