@@ -5,6 +5,7 @@ import requireOrgAccess from "../middleware/requireOrgAccess.js";
 import boardModel from "../models/boardModel.js";
 
 const cardRouter = express.Router();
+
 async function orgIdFromBoard(req) {
   const board = await departmentModel.findById( req.params.boardId);
   return board?.orgId;

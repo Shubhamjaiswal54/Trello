@@ -6,6 +6,7 @@ import axios from 'axios'
 interface Department {
     _id: string;
     name: string;
+    orgId:string;
 }
 
 const getToken = () => localStorage.getItem('token');
@@ -17,6 +18,7 @@ function deptInitial(name: string) {
 const DepartmentPage = () => {
     const { organizationId } = useParams();
     const baseurl = `http://localhost:3000/api/departments/${organizationId}/`;
+    console.log(organizationId);
 
     const [deptlist, setDeptlist] = useState<Department[]>([]);
     const [name, setName] = useState('');
@@ -30,8 +32,7 @@ const DepartmentPage = () => {
         if (organizationId) {
             getAllDept();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [organizationId]);
+    }, []);
 
     async function getAllDept() {
         setLoading(true);
@@ -41,6 +42,7 @@ const DepartmentPage = () => {
             const response = await axios.get(baseurl, {
                 headers: { token: getToken() },
             });
+            console.log(response);
             const data = response.data;
             const list: Department[] = Array.isArray(data)
                 ? data
@@ -70,7 +72,7 @@ const DepartmentPage = () => {
         try {
             const response = await axios.post(
                 `${baseurl}create`,
-                { name: name.trim() },
+                { name: name.trim() , orgId:organizationId },
                 { headers: { token: getToken() } }
             );
 

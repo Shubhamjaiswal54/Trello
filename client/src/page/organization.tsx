@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 interface Organization {
   _id: string;
   name: string;
@@ -29,12 +30,11 @@ const Organization = () => {
   const [justAddedId, setJustAddedId] = useState<string | null>(null);
   const navigate = useNavigate();
 
-
-  function handlepage(id :string ) {
+  function handlePage(id: string) {
     navigate(`/organizations/${id}`);
   }
 
-function handleDepartment(id :string ) {
+  function handleDepartment(id: string) {
     navigate(`../${id}/departments`);
   }
 
@@ -123,6 +123,8 @@ function handleDepartment(id :string ) {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
+        * { box-sizing: border-box; }
+
         .registry-root {
           min-height: 100vh;
           background: #14181f;
@@ -133,7 +135,7 @@ function handleDepartment(id :string ) {
           font-family: 'Inter', sans-serif;
           padding: 64px 24px 80px;
         }
-        .registry-shell { max-width: 920px; margin: 0 auto; }
+        .registry-shell { max-width: 960px; margin: 0 auto; }
         .eyebrow {
           font-family: 'JetBrains Mono', monospace;
           font-size: 12px;
@@ -148,6 +150,11 @@ function handleDepartment(id :string ) {
           width: 6px; height: 6px; border-radius: 50%;
           background: #6B8F71;
           box-shadow: 0 0 0 3px rgba(107,143,113,0.18);
+          animation: pulse 2.4s ease-in-out infinite;
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.45; }
         }
         .headline {
           font-family: 'Fraunces', serif;
@@ -201,9 +208,9 @@ function handleDepartment(id :string ) {
           font-family: 'Inter', sans-serif;
           font-size: 14px;
           outline: none;
-          transition: border-color 0.15s ease;
-          box-sizing: border-box;
+          transition: border-color 0.15s ease, box-shadow 0.15s ease;
         }
+        .input::placeholder { color: #5c5a52; }
         .input:focus {
           border-color: #C9A227;
           box-shadow: 0 0 0 3px rgba(201,162,39,0.14);
@@ -225,6 +232,13 @@ function handleDepartment(id :string ) {
         .submit-btn:hover:not(:disabled) { filter: brightness(1.08); }
         .submit-btn:active:not(:disabled) { transform: translateY(1px); }
         .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .submit-btn:focus-visible,
+        .ghost-btn:focus-visible,
+        .void-btn:focus-visible,
+        .input:focus-visible {
+          outline: 2px solid #C9A227;
+          outline-offset: 2px;
+        }
         .error-banner {
           margin-top: 14px;
           font-size: 13px;
@@ -236,7 +250,7 @@ function handleDepartment(id :string ) {
         }
         .ledger-header {
           display: grid;
-          grid-template-columns: 90px 1fr 44px;
+          grid-template-columns: 90px 1fr auto;
           gap: 12px;
           padding: 0 16px 12px;
           font-family: 'JetBrains Mono', monospace;
@@ -245,15 +259,17 @@ function handleDepartment(id :string ) {
           color: #6b6a63;
           border-bottom: 1px solid rgba(237,231,217,0.1);
         }
+        .ledger-header span:last-child { text-align: right; }
         .ledger-row {
           display: grid;
-          grid-template-columns: 90px 1fr 44px;
+          grid-template-columns: 90px 1fr auto;
           gap: 12px;
           align-items: center;
           padding: 14px 16px;
           border-bottom: 1px solid rgba(237,231,217,0.06);
           transition: background 0.15s ease;
         }
+        .ledger-row:last-child { border-bottom: none; }
         .ledger-row:hover { background: rgba(237,231,217,0.03); }
         .ledger-row.entering {
           animation: stamp-in 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2);
@@ -293,6 +309,40 @@ function handleDepartment(id :string ) {
           text-overflow: ellipsis;
           white-space: nowrap;
         }
+        .row-actions {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          opacity: 0;
+          transition: opacity 0.15s ease;
+        }
+        .ledger-row:hover .row-actions,
+        .ledger-row:focus-within .row-actions {
+          opacity: 1;
+        }
+        .ghost-btn {
+          background: none;
+          border: 1px solid rgba(237,231,217,0.18);
+          color: #A7A093;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 10px;
+          letter-spacing: 0.06em;
+          border-radius: 2px;
+          padding: 5px 9px;
+          cursor: pointer;
+          white-space: nowrap;
+          transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+        }
+        .ghost-btn:hover {
+          border-color: #C9A227;
+          color: #C9A227;
+          background: rgba(201,162,39,0.08);
+        }
+        .ghost-btn.departments:hover {
+          border-color: #6B8F71;
+          color: #6B8F71;
+          background: rgba(107,143,113,0.08);
+        }
         .void-btn {
           background: none;
           border: 1px solid rgba(179,58,58,0.4);
@@ -301,12 +351,11 @@ function handleDepartment(id :string ) {
           font-size: 10px;
           letter-spacing: 0.06em;
           border-radius: 2px;
-          padding: 5px 6px;
+          padding: 5px 9px;
           cursor: pointer;
-          opacity: 0;
-          transition: opacity 0.15s ease, background 0.15s ease;
+          white-space: nowrap;
+          transition: background 0.15s ease;
         }
-        .ledger-row:hover .void-btn { opacity: 1; }
         .void-btn:hover:not(:disabled) { background: rgba(179,58,58,0.12); }
         .void-btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .empty-state, .loading-state {
@@ -318,6 +367,9 @@ function handleDepartment(id :string ) {
         .loading-state {
           font-family: 'JetBrains Mono', monospace;
           letter-spacing: 0.06em;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .eyebrow-dot, .ledger-row.entering { animation: none; }
         }
       `}</style>
 
@@ -356,7 +408,7 @@ function handleDepartment(id :string ) {
             <div className="ledger-header">
               <span>REG NO</span>
               <span>ORGANIZATION</span>
-              <span></span>
+              <span>ACTIONS</span>
             </div>
 
             {loading ? (
@@ -373,22 +425,27 @@ function handleDepartment(id :string ) {
                   <span className="org-cell">
                     <span className="seal">{initials(item.name)}</span>
                     <span className="org-name">{item.name}</span>
-
                   </span>
 
-                  <button onClick={() => handlepage(item._id)}>go to the page</button>
-                  <button onClick={() => handleDepartment(item._id)}>DEPARTMENTS</button>
-
-                  <button
-                    className="void-btn"
-                    onClick={() => deleteOrg(item._id)}
-                    disabled={deletingId === item._id}
-                    title="Remove organization"
-                  >
-                    VOID
-                  </button>
-
-
+                  <span className="row-actions">
+                    <button className="ghost-btn" onClick={() => handlePage(item._id)}>
+                      OPEN
+                    </button>
+                    <button
+                      className="ghost-btn departments"
+                      onClick={() => handleDepartment(item._id)}
+                    >
+                      DEPTS
+                    </button>
+                    <button
+                      className="void-btn"
+                      onClick={() => deleteOrg(item._id)}
+                      disabled={deletingId === item._id}
+                      title="Remove organization"
+                    >
+                      {deletingId === item._id ? '…' : 'VOID'}
+                    </button>
+                  </span>
                 </div>
               ))
             )}

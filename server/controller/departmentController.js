@@ -5,10 +5,11 @@ const addDepartment = async (req, res) => {
   try {
     const { name } = req.body;
     const { organizationId } = req.params;
+    console.log(name +" "+organizationId);
 
     const department = await departmentModel.create({
       name,
-      organizationId,
+      orgId : organizationId,
     });
 
     res.status(201).json({
