@@ -47,7 +47,7 @@ const User = () => {
         if(response.status === 200) {
             const token= response.data;
             localStorage.setItem('token', token);
-            navigate('/');
+            navigate('/organizations');
         }else{
             console.error('Error creating account:', response.data);
             navigate('/user');

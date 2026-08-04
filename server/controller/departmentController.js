@@ -8,7 +8,7 @@ const addDepartment = async (req, res) => {
 
     const department = await departmentModel.create({
       name,
-      orgId: organizationId,
+      organizationId,
     });
 
     res.status(201).json({

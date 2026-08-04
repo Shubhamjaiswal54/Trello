@@ -9,9 +9,9 @@ const NavBar = () => {
   const [profileOpen, setProfileOpen] = useState(false)
 
   return (
-    
+
     <div className="fixed top-4 left-0 right-0 z-50 w-full px-4">
-      <div className="max-w-4xl mx-auto h-16 bg-black backdrop-blur-md border border-white/10 shadow-lg shadow-black/20 px-6 rounded-full flex items-center justify-between">
+      <div className="max-w-4xl mx-auto h-16 bg-[#1b2129] backdrop-blur-md border border-white/10 shadow-lg shadow-black/30 px-6 rounded-full flex items-center justify-between">
 
         {/* Left: logo */}
         <div className="flex items-center gap-3 shrink-0">
@@ -24,12 +24,12 @@ const NavBar = () => {
             <button
               key={item}
               onClick={() => setActive(item)}
-              className={`relative px-4 py-2 text-sm font-medium rounded-full transition-colors duration-200 ${active === item ? 'text-white' : 'text-white/50 hover:text-white/90'
+              className={`relative px-4 py-2 text-sm font-medium rounded-full transition-colors duration-200 ${active === item ? 'text-[#eef1f5]' : 'text-white/50 hover:text-white/90'
                 }`}
 
             >
               {active === item && (
-                <span className="absolute inset-0 bg-white/10 rounded-full" />
+                <span className="absolute inset-0 bg-[#5b7ea3]/20 rounded-full" />
               )}
               <span className="relative">{item}</span>
             </button>
@@ -50,7 +50,7 @@ const NavBar = () => {
             </button>
 
             {profileOpen && (
-              <div className="absolute right-0 mt-3 w-40 bg-black/90 backdrop-blur-md border border-white/10 rounded-xl shadow-lg py-1 text-sm">
+              <div className="absolute right-0 mt-3 w-40 bg-[#232b36] backdrop-blur-md border border-white/10 rounded-xl shadow-lg py-1 text-sm">
                 <a href="#" className="block px-4 py-2 text-white/70 hover:text-white hover:bg-white/5">
                   Profile
                 </a>
@@ -58,7 +58,7 @@ const NavBar = () => {
                   Settings
                 </a>
                 <div className="my-1 border-t border-white/10" />
-                <a href="#" className="block px-4 py-2 text-orange-500 hover:bg-white/5">
+                <a href="#" className="block px-4 py-2 text-[#d1495b] hover:bg-white/5">
                   Sign out
                 </a>
               </div>
@@ -77,7 +77,7 @@ const NavBar = () => {
 
       {/* Mobile dropdown */}
       {mobileOpen && (
-        <div className="md:hidden max-w-4xl mx-auto mt-2 bg-black/90 backdrop-blur-md border border-white/10 rounded-2xl shadow-lg py-2 px-2">
+        <div className="md:hidden max-w-4xl mx-auto mt-2 bg-[#232b36] backdrop-blur-md border border-white/10 rounded-2xl shadow-lg py-2 px-2">
           {NAV_LINKS.map((item) => (
             <button
               key={item}
@@ -85,7 +85,7 @@ const NavBar = () => {
                 setActive(item)
                 setMobileOpen(false)
               }}
-              className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-colors ${active === item ? 'text-white bg-white/10' : 'text-white/60 hover:text-white'
+              className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-colors ${active === item ? 'text-[#eef1f5] bg-[#5b7ea3]/15' : 'text-white/60 hover:text-white'
                 }`}
             >
               {item}

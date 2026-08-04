@@ -1,39 +1,29 @@
 import mongoose from "mongoose";
 const cardSchema = new mongoose.Schema(
   {
-    title: {
+    uuid: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    text: {
       type: String,
       required: true,
     },
 
-    description: {
+    pos: {
       type: String,
-    },
-
-    x: {
-      type: Number,
-      default: 0,
-    },
-
-    y: {
-      type: Number,
-      default: 0,
-    },
-
-    z: {
-      type: Number,
-      default: 0,
-    },
-
-    status: {
-      type: String,
-      enum: ["pending", "todo", "completed"],
-      default: "pending",
     },
 
     boardId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Board",
+      required: true,
+      index: true,
+    },
+    orgId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Organizations",
       required: true,
       index: true,
     },

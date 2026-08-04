@@ -11,7 +11,12 @@ const boardSchema = new mongoose.Schema(
       ref: "Department",
       required: true,
     },
-
+    orgId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Organizations",
+      required: true,
+      index: true,
+    },
   },
 
   { timestamps: true },

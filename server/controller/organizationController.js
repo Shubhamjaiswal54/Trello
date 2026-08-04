@@ -59,7 +59,7 @@ const getorganization = async (req, res) => {
 
     const organization = await organizationModel
       .findById(organizationId)
-      .populate("members", "-password") // Good practice: exclude sensitive fields like password
+      .populate("members", "-password")
       .populate("owner", "-password");
 
     if (!organization) {
@@ -74,10 +74,8 @@ const getorganization = async (req, res) => {
 
 const getall = async (req, res) => {
   try {
-    // Note: If you only want users to see orgs they belong to, use:
-    // const organization = await organizationModel.find({ members: req.userId });
-    const organization = await organizationModel.find();
-
+    console.log(req.userId);
+    const organization = await organizationModel.find({owner:req.userId});
     res.status(200).json({ organization });
   } catch (error) {
     res.status(500).json({ message: error.message });

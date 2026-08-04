@@ -3,7 +3,6 @@ import express from "express";
 const organizationRouter = express.Router();
 import auth from "../middleware/auth.js";
 
-
 organizationRouter.post("/create",auth, addorganization);
 organizationRouter.get("/allorganizations",auth, getall);
 organizationRouter.delete("/:organizationId",auth, removeOrganization);

@@ -1,19 +1,24 @@
 import Home from '@/page/Home'
-import User from './page/user'
+import User from './page/login'
 import { Routes, Route } from 'react-router-dom'
 import Organization from './page/organization'
-import CardPage from './page/cardPage'
+import MembersPage from './page/MembersPage'
 import DepartmentPage from './page/departmentPage'
+import BoardPage from './page/boardpage'
+import CardsPage from './page/CardsPage'
 const App = () => {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/user" element={<User />} />
+      <Route path="/user/login" element={<User />} />
+      <Route path="/user/register" element={<User />} />
+
       <Route path="/organizations" element={<Organization />} />
-      <Route path="/organizations/:organizationId" element={<CardPage />} />
-      <Route path="/:organizationId" element={<DepartmentPage />} />
+      <Route path="/organizations/:organizationId" element={<MembersPage />} />
 
-
+      <Route path="/:organizationId/departments" element={<DepartmentPage />} />
+      <Route path="/:departmentId/board" element={<BoardPage />} />
+      <Route path="/:boardId/cards" element={<CardsPage />} />
     </Routes>
   )
 }

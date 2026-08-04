@@ -3,9 +3,6 @@ import jwt from "jsonwebtoken";
 const auth = (req, res, next) => {
   try {
     const authHeader = req.headers;
-
-    
-
     if (!authHeader) {
       return res.status(401).json({
         message: "No token provided",

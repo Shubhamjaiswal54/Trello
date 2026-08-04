@@ -34,7 +34,9 @@ const Organization = () => {
     navigate(`/organizations/${id}`);
   }
 
-
+function handleDepartment(id :string ) {
+    navigate(`../${id}/departments`);
+  }
 
   useEffect(() => {
     getOrgs();
@@ -375,6 +377,8 @@ const Organization = () => {
                   </span>
 
                   <button onClick={() => handlepage(item._id)}>go to the page</button>
+                  <button onClick={() => handleDepartment(item._id)}>DEPARTMENTS</button>
+
                   <button
                     className="void-btn"
                     onClick={() => deleteOrg(item._id)}
