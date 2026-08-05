@@ -52,9 +52,9 @@ const deleteboard = async (req, res) => {
 const getallboards = async (req, res) => {
   try {
     const { departmentId } = req.params;
+    console.log(departmentId +"here it is ");
+    
     const board = await boardModel.find({ departmentId });
-    console.log(departmentId);
-    console.log(departmentId);
     res.status(200).json(board);
   } catch (error) {
     res.status(500).json({ message: error.message });

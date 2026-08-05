@@ -9,7 +9,6 @@ interface Organization {
 
 const token = localStorage.getItem('token');
 
-// Turns a mongo _id into a short, ledger-style reference number.
 function regNumber(id: string) {
   return id.slice(-6).toUpperCase();
 }
@@ -38,9 +37,36 @@ const Organization = () => {
     navigate(`../${id}/departments`);
   }
 
-  useEffect(() => {
-    getOrgs();
-  }, []);
+
+  async function getorgsMe() {
+    try {
+      setError('');
+      setLoading(true);
+
+      const response = await axios.get(
+        'http://localhost:3000/api/organizations/allorganizations/me',
+        { headers: { token } }
+      );
+      const data = response.data;
+      const list: Organization[] = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.organizations)
+          ? data.organizations
+          : Array.isArray(data?.organization)
+            ? data.organization
+            : [];
+
+      setOrglist([...list]);
+
+    } catch (err) {
+      console.error('Failed to fetch organizations', err);
+      setError('Could not load the registry. Check your connection and try again.');
+      setOrglist([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
 
   async function getOrgs() {
     setLoading(true);
@@ -86,6 +112,10 @@ const Organization = () => {
     }
   }
 
+  useEffect(() => {
+    getorgsMe();
+  }, []);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim() || submitting) return;
@@ -127,11 +157,11 @@ const Organization = () => {
 
         .registry-root {
           min-height: 100vh;
-          background: #14181f;
+          background: #1b2129; /* Matched theme */
           background-image:
-            radial-gradient(circle at 15% 0%, rgba(201,162,39,0.06), transparent 45%),
-            radial-gradient(circle at 100% 100%, rgba(107,143,113,0.05), transparent 40%);
-          color: #EDE7D9;
+            radial-gradient(circle at 15% 0%, rgba(91,126,163,0.08), transparent 45%), /* #5b7ea3 */
+            radial-gradient(circle at 100% 100%, rgba(122,155,116,0.08), transparent 40%); /* #7a9b74 */
+          color: #eef1f5;
           font-family: 'Inter', sans-serif;
           padding: 64px 24px 80px;
         }
@@ -140,7 +170,7 @@ const Organization = () => {
           font-family: 'JetBrains Mono', monospace;
           font-size: 12px;
           letter-spacing: 0.18em;
-          color: #C9A227;
+          color: #5b7ea3; /* Matched theme */
           display: flex;
           align-items: center;
           gap: 8px;
@@ -148,8 +178,8 @@ const Organization = () => {
         }
         .eyebrow-dot {
           width: 6px; height: 6px; border-radius: 50%;
-          background: #6B8F71;
-          box-shadow: 0 0 0 3px rgba(107,143,113,0.18);
+          background: #7a9b74; /* Matched theme */
+          box-shadow: 0 0 0 3px rgba(122,155,116,0.18);
           animation: pulse 2.4s ease-in-out infinite;
         }
         @keyframes pulse {
@@ -164,7 +194,7 @@ const Organization = () => {
           margin: 0 0 10px;
         }
         .subhead {
-          color: #A7A093;
+          color: #8b93a1; /* Matched theme */
           font-size: 15px;
           margin: 0 0 40px;
           max-width: 52ch;
@@ -180,8 +210,8 @@ const Organization = () => {
           .grid { grid-template-columns: 1fr; }
         }
         .card {
-          background: #1c222c;
-          border: 1px solid rgba(201,162,39,0.18);
+          background: #232b36; /* Matched theme */
+          border: 1px solid rgba(91,126,163,0.2);
           border-radius: 3px;
           padding: 24px;
         }
@@ -189,37 +219,37 @@ const Organization = () => {
           font-family: 'JetBrains Mono', monospace;
           font-size: 11px;
           letter-spacing: 0.14em;
-          color: #C9A227;
+          color: #5b7ea3; /* Matched theme */
           margin-bottom: 16px;
         }
         .field-label {
           display: block;
           font-size: 13px;
-          color: #A7A093;
+          color: #8b93a1; /* Matched theme */
           margin-bottom: 8px;
         }
         .input {
           width: 100%;
-          background: #14181f;
-          border: 1px solid rgba(237,231,217,0.16);
+          background: #1b2129;
+          border: 1px solid rgba(238,241,245,0.16);
           border-radius: 2px;
           padding: 11px 12px;
-          color: #EDE7D9;
+          color: #eef1f5;
           font-family: 'Inter', sans-serif;
           font-size: 14px;
           outline: none;
           transition: border-color 0.15s ease, box-shadow 0.15s ease;
         }
-        .input::placeholder { color: #5c5a52; }
+        .input::placeholder { color: #6b7280; }
         .input:focus {
-          border-color: #C9A227;
-          box-shadow: 0 0 0 3px rgba(201,162,39,0.14);
+          border-color: #5b7ea3;
+          box-shadow: 0 0 0 3px rgba(91,126,163,0.15);
         }
         .submit-btn {
           margin-top: 16px;
           width: 100%;
-          background: #C9A227;
-          color: #14181f;
+          background: #5b7ea3; /* Matched theme */
+          color: #101418;
           border: none;
           border-radius: 2px;
           padding: 11px 14px;
@@ -227,24 +257,24 @@ const Organization = () => {
           font-weight: 600;
           font-size: 14px;
           cursor: pointer;
-          transition: filter 0.15s ease, transform 0.1s ease;
+          transition: opacity 0.15s ease, transform 0.1s ease;
         }
-        .submit-btn:hover:not(:disabled) { filter: brightness(1.08); }
+        .submit-btn:hover:not(:disabled) { opacity: 0.9; }
         .submit-btn:active:not(:disabled) { transform: translateY(1px); }
         .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .submit-btn:focus-visible,
         .ghost-btn:focus-visible,
         .void-btn:focus-visible,
         .input:focus-visible {
-          outline: 2px solid #C9A227;
+          outline: 2px solid #5b7ea3;
           outline-offset: 2px;
         }
         .error-banner {
           margin-top: 14px;
           font-size: 13px;
-          color: #E2A5A5;
-          background: rgba(179,58,58,0.1);
-          border: 1px solid rgba(179,58,58,0.3);
+          color: #d1495b; /* Matched theme red */
+          background: rgba(209,73,91,0.1);
+          border: 1px solid rgba(209,73,91,0.3);
           border-radius: 2px;
           padding: 10px 12px;
         }
@@ -256,8 +286,8 @@ const Organization = () => {
           font-family: 'JetBrains Mono', monospace;
           font-size: 11px;
           letter-spacing: 0.1em;
-          color: #6b6a63;
-          border-bottom: 1px solid rgba(237,231,217,0.1);
+          color: #8b93a1;
+          border-bottom: 1px solid rgba(238,241,245,0.1);
         }
         .ledger-header span:last-child { text-align: right; }
         .ledger-row {
@@ -266,11 +296,11 @@ const Organization = () => {
           gap: 12px;
           align-items: center;
           padding: 14px 16px;
-          border-bottom: 1px solid rgba(237,231,217,0.06);
+          border-bottom: 1px solid rgba(238,241,245,0.06);
           transition: background 0.15s ease;
         }
         .ledger-row:last-child { border-bottom: none; }
-        .ledger-row:hover { background: rgba(237,231,217,0.03); }
+        .ledger-row:hover { background: rgba(238,241,245,0.03); }
         .ledger-row.entering {
           animation: stamp-in 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2);
         }
@@ -282,7 +312,7 @@ const Organization = () => {
         .reg-no {
           font-family: 'JetBrains Mono', monospace;
           font-size: 12px;
-          color: #C9A227;
+          color: #5b7ea3; /* Matched theme */
         }
         .org-cell {
           display: flex;
@@ -294,17 +324,17 @@ const Organization = () => {
           flex-shrink: 0;
           width: 30px; height: 30px;
           border-radius: 50%;
-          border: 1.5px solid #C9A227;
+          border: 1.5px solid #5b7ea3; /* Matched theme */
           display: flex;
           align-items: center;
           justify-content: center;
           font-family: 'JetBrains Mono', monospace;
           font-size: 11px;
-          color: #C9A227;
+          color: #5b7ea3; /* Matched theme */
         }
         .org-name {
           font-size: 14px;
-          color: #EDE7D9;
+          color: #eef1f5;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
@@ -322,8 +352,8 @@ const Organization = () => {
         }
         .ghost-btn {
           background: none;
-          border: 1px solid rgba(237,231,217,0.18);
-          color: #A7A093;
+          border: 1px solid rgba(238,241,245,0.18);
+          color: #8b93a1;
           font-family: 'JetBrains Mono', monospace;
           font-size: 10px;
           letter-spacing: 0.06em;
@@ -334,19 +364,19 @@ const Organization = () => {
           transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
         }
         .ghost-btn:hover {
-          border-color: #C9A227;
-          color: #C9A227;
-          background: rgba(201,162,39,0.08);
+          border-color: #5b7ea3;
+          color: #5b7ea3;
+          background: rgba(91,126,163,0.08); /* #5b7ea3 with opacity */
         }
         .ghost-btn.departments:hover {
-          border-color: #6B8F71;
-          color: #6B8F71;
-          background: rgba(107,143,113,0.08);
+          border-color: #7a9b74;
+          color: #7a9b74;
+          background: rgba(122,155,116,0.08); /* #7a9b74 with opacity */
         }
         .void-btn {
           background: none;
-          border: 1px solid rgba(179,58,58,0.4);
-          color: #B33A3A;
+          border: 1px solid rgba(209,73,91,0.4);
+          color: #d1495b; /* Matched theme red */
           font-family: 'JetBrains Mono', monospace;
           font-size: 10px;
           letter-spacing: 0.06em;
@@ -356,12 +386,12 @@ const Organization = () => {
           white-space: nowrap;
           transition: background 0.15s ease;
         }
-        .void-btn:hover:not(:disabled) { background: rgba(179,58,58,0.12); }
+        .void-btn:hover:not(:disabled) { background: rgba(209,73,91,0.12); }
         .void-btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .empty-state, .loading-state {
           padding: 40px 16px;
           text-align: center;
-          color: #6b6a63;
+          color: #8b93a1;
           font-size: 13px;
         }
         .loading-state {

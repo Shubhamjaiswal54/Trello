@@ -44,10 +44,9 @@ const LoginPage = () => {
             });
 
             if (response.status === 200) {
-                
                 const token = response.data;
                 localStorage.setItem('token', token);
-                console.log(response +"hello from logoin");
+                console.log("hello from login", response.data);
                 navigate('/organizations');
             } else {
                 console.error('Login error:', response.data);
@@ -72,11 +71,11 @@ const LoginPage = () => {
 
                 .enroll-root {
                     min-height: 100vh;
-                    background: #14181f;
+                    background: #1b2129; /* Matched Home bg */
                     background-image:
-                        radial-gradient(circle at 10% 5%, rgba(201,162,39,0.06), transparent 45%),
-                        radial-gradient(circle at 95% 95%, rgba(107,143,113,0.05), transparent 40%);
-                    color: #EDE7D9;
+                        radial-gradient(circle at 10% 5%, rgba(91,126,163,0.08), transparent 45%), /* #5b7ea3 */
+                        radial-gradient(circle at 95% 95%, rgba(122,155,116,0.08), transparent 40%); /* #7a9b74 */
+                    color: #eef1f5; /* Matched Home text */
                     font-family: 'Inter', sans-serif;
                     display: flex;
                     align-items: center;
@@ -88,10 +87,10 @@ const LoginPage = () => {
                     max-width: 920px;
                     display: grid;
                     grid-template-columns: 300px 1fr;
-                    border: 1px solid rgba(201,162,39,0.18);
+                    border: 1px solid rgba(91,126,163,0.2);
                     border-radius: 3px;
                     overflow: hidden;
-                    background: #1c222c;
+                    background: #232b36; /* Matched Home step card bg */
                 }
                 @media (max-width: 760px) {
                     .enroll-shell { grid-template-columns: 1fr; }
@@ -100,8 +99,8 @@ const LoginPage = () => {
 
                 /* Left: preview panel */
                 .enroll-preview {
-                    background: #14181f;
-                    border-right: 1px solid rgba(201,162,39,0.14);
+                    background: #1b2129;
+                    border-right: 1px solid rgba(91,126,163,0.15);
                     padding: 32px 28px;
                     display: flex;
                     flex-direction: column;
@@ -111,7 +110,7 @@ const LoginPage = () => {
                     font-family: 'JetBrains Mono', monospace;
                     font-size: 11px;
                     letter-spacing: 0.18em;
-                    color: #C9A227;
+                    color: #5b7ea3; /* Matched Home accent */
                     display: flex;
                     align-items: center;
                     gap: 8px;
@@ -119,8 +118,8 @@ const LoginPage = () => {
                 }
                 .eyebrow-dot {
                     width: 6px; height: 6px; border-radius: 50%;
-                    background: #6B8F71;
-                    box-shadow: 0 0 0 3px rgba(107,143,113,0.18);
+                    background: #7a9b74; /* Matched Home secondary accent */
+                    box-shadow: 0 0 0 3px rgba(122,155,116,0.18);
                 }
                 .preview-heading {
                     font-family: 'Fraunces', serif;
@@ -130,15 +129,15 @@ const LoginPage = () => {
                     margin: 0 0 10px;
                 }
                 .preview-copy {
-                    color: #A7A093;
+                    color: #8b93a1; /* Matched Home muted text */
                     font-size: 13px;
                     line-height: 1.6;
                     margin: 0;
                 }
                 .preview-card {
                     margin-top: 28px;
-                    background: #1c222c;
-                    border: 1px solid rgba(237,231,217,0.1);
+                    background: #232b36;
+                    border: 1px solid rgba(238,241,245,0.1);
                     border-radius: 3px;
                     padding: 18px;
                 }
@@ -152,15 +151,15 @@ const LoginPage = () => {
                     flex-shrink: 0;
                     width: 38px; height: 38px;
                     border-radius: 50%;
-                    border: 1.5px solid #C9A227;
+                    border: 1.5px solid #5b7ea3;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    color: #C9A227;
+                    color: #5b7ea3;
                 }
                 .preview-name {
                     font-size: 14px;
-                    color: #EDE7D9;
+                    color: #eef1f5;
                     font-weight: 500;
                     overflow: hidden;
                     text-overflow: ellipsis;
@@ -168,14 +167,14 @@ const LoginPage = () => {
                 }
                 .preview-email {
                     font-size: 12px;
-                    color: #6b6a63;
+                    color: #8b93a1;
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
                 }
                 .preview-footnote {
                     margin-top: 24px;
-                    color: #565349;
+                    color: #6b7280;
                     font-size: 11px;
                     line-height: 1.5;
                 }
@@ -189,7 +188,7 @@ const LoginPage = () => {
                     margin: 0 0 6px;
                 }
                 .form-subtitle {
-                    color: #A7A093;
+                    color: #8b93a1;
                     font-size: 13px;
                     margin: 0 0 26px;
                 }
@@ -199,7 +198,7 @@ const LoginPage = () => {
                     font-family: 'JetBrains Mono', monospace;
                     font-size: 11px;
                     letter-spacing: 0.08em;
-                    color: #A7A093;
+                    color: #8b93a1;
                     margin-bottom: 7px;
                 }
                 .field-wrap { position: relative; }
@@ -208,31 +207,31 @@ const LoginPage = () => {
                     left: 12px;
                     top: 50%;
                     transform: translateY(-50%);
-                    color: #6b6a63;
+                    color: #8b93a1;
                     pointer-events: none;
                 }
                 .field-input {
                     width: 100%;
-                    background: #14181f;
-                    border: 1px solid rgba(237,231,217,0.16);
+                    background: #1b2129;
+                    border: 1px solid rgba(238,241,245,0.16);
                     border-radius: 2px;
                     padding: 11px 12px 11px 38px;
-                    color: #EDE7D9;
+                    color: #eef1f5;
                     font-family: 'Inter', sans-serif;
                     font-size: 14px;
                     outline: none;
                     transition: border-color 0.15s ease, box-shadow 0.15s ease;
                 }
-                .field-input::placeholder { color: #565349; }
+                .field-input::placeholder { color: #6b7280; }
                 .field-input:focus {
-                    border-color: #C9A227;
-                    box-shadow: 0 0 0 3px rgba(201,162,39,0.14);
+                    border-color: #5b7ea3;
+                    box-shadow: 0 0 0 3px rgba(91,126,163,0.15);
                 }
                 .field-input.has-error {
-                    border-color: #B33A3A;
+                    border-color: #d1495b; /* Using Home gradient red */
                 }
                 .field-input.has-error:focus {
-                    box-shadow: 0 0 0 3px rgba(179,58,58,0.14);
+                    box-shadow: 0 0 0 3px rgba(209,73,91,0.15);
                 }
                 .toggle-visibility {
                     position: absolute;
@@ -241,16 +240,16 @@ const LoginPage = () => {
                     transform: translateY(-50%);
                     background: none;
                     border: none;
-                    color: #6b6a63;
+                    color: #8b93a1;
                     cursor: pointer;
                     padding: 4px;
                     display: flex;
                 }
-                .toggle-visibility:hover { color: #A7A093; }
+                .toggle-visibility:hover { color: #eef1f5; }
                 .field-error {
                     margin-top: 6px;
                     font-size: 12px;
-                    color: #E2A5A5;
+                    color: #d1495b;
                 }
                 .submit-btn {
                     margin-top: 6px;
@@ -259,8 +258,8 @@ const LoginPage = () => {
                     align-items: center;
                     justify-content: center;
                     gap: 8px;
-                    background: #C9A227;
-                    color: #14181f;
+                    background: #5b7ea3; /* Matched Home button bg */
+                    color: #101418; /* Matched Home button text */
                     border: none;
                     border-radius: 2px;
                     padding: 12px 14px;
@@ -268,23 +267,23 @@ const LoginPage = () => {
                     font-weight: 600;
                     font-size: 14px;
                     cursor: pointer;
-                    transition: filter 0.15s ease, transform 0.1s ease;
+                    transition: opacity 0.15s ease, transform 0.1s ease;
                 }
-                .submit-btn:hover:not(:disabled) { filter: brightness(1.08); }
+                .submit-btn:hover:not(:disabled) { opacity: 0.9; }
                 .submit-btn:active:not(:disabled) { transform: translateY(1px); }
                 .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
                 .submit-btn:focus-visible,
                 .field-input:focus-visible,
                 .toggle-visibility:focus-visible {
-                    outline: 2px solid #C9A227;
+                    outline: 2px solid #5b7ea3;
                     outline-offset: 2px;
                 }
                 .form-error-banner {
                     margin-bottom: 16px;
                     font-size: 13px;
-                    color: #E2A5A5;
-                    background: rgba(179,58,58,0.1);
-                    border: 1px solid rgba(179,58,58,0.3);
+                    color: #d1495b;
+                    background: rgba(209,73,91,0.1);
+                    border: 1px solid rgba(209,73,91,0.3);
                     border-radius: 2px;
                     padding: 10px 12px;
                 }

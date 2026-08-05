@@ -1,10 +1,14 @@
-import {addmember, removeMember , addorganization, removeOrganization, getall,getorganization} from "../controller/organizationController.js";
+import {addmember, removeMember , getallme ,addorganization, removeOrganization, getall,getorganization} from "../controller/organizationController.js";
 import express from "express";
 const organizationRouter = express.Router();
 import auth from "../middleware/auth.js";
 
 organizationRouter.post("/create",auth, addorganization);
 organizationRouter.get("/allorganizations",auth, getall);
+organizationRouter.get("/allorganizations/me",auth, getallme);
+
+
+
 organizationRouter.delete("/:organizationId",auth, removeOrganization);
 
 organizationRouter.get("/:organizationId",auth, getorganization);

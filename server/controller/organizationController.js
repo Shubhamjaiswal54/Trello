@@ -81,6 +81,17 @@ const getall = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+const getallme = async (req, res) => {
+  try {
+    console.log(req.userId);
+    const organization = await organizationModel.find({members:req.userId}).select("name _id");
+    res.status(200).json({ organization });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 const addmember = async (req, res) => {
   try {
     const { organizationId } = req.params;
@@ -165,4 +176,5 @@ export {
   removeOrganization,
   getall,
   getorganization,
+  getallme,
 };

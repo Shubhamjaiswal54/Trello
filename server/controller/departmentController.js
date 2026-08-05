@@ -5,11 +5,20 @@ const addDepartment = async (req, res) => {
   try {
     const { name } = req.body;
     const { organizationId } = req.params;
-    console.log(name +" "+organizationId);
+    console.log(name + " " + organizationId);
+
+    const d = await departmentModel.findOne({ name : name, orgId:organizationId });
+    if (d) {
+      res.status(202).json({
+        message: "Department already exists",
+      });
+    }
+
+    
 
     const department = await departmentModel.create({
       name,
-      orgId : organizationId,
+      orgId: organizationId,
     });
 
     res.status(201).json({
@@ -50,4 +59,4 @@ const getDepartment = async (req, res) => {
   }
 };
 
-export {addDepartment , removeDepartment , getDepartment};
+export { addDepartment, removeDepartment, getDepartment };

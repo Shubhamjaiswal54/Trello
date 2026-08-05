@@ -6,7 +6,7 @@ import axios from 'axios'
 interface Department {
     _id: string;
     name: string;
-    orgId:string;
+    orgId: string;
 }
 
 const getToken = () => localStorage.getItem('token');
@@ -34,11 +34,16 @@ const DepartmentPage = () => {
         }
     }, []);
 
+    function handlePage(id: string) {
+        navigate(`/${id}/board`);
+    }
+
+
     async function getAllDept() {
         setLoading(true);
         setError('');
         try {
-            
+
             const response = await axios.get(baseurl, {
                 headers: { token: getToken() },
             });
@@ -47,12 +52,12 @@ const DepartmentPage = () => {
             const list: Department[] = Array.isArray(data)
                 ? data
                 : Array.isArray(data?.departments)
-                ? data.departments
-                : Array.isArray(data?.organizations)
-                ? data.organizations
-                : Array.isArray(data?.organization)
-                ? data.organization
-                : [];
+                    ? data.departments
+                    : Array.isArray(data?.organizations)
+                        ? data.organizations
+                        : Array.isArray(data?.organization)
+                            ? data.organization
+                            : [];
             setDeptlist(list);
         } catch (err) {
             console.error('Failed to fetch departments', err);
@@ -72,7 +77,7 @@ const DepartmentPage = () => {
         try {
             const response = await axios.post(
                 `${baseurl}create`,
-                { name: name.trim() , orgId:organizationId },
+                { name: name.trim(), orgId: organizationId },
                 { headers: { token: getToken() } }
             );
 
@@ -312,6 +317,7 @@ const DepartmentPage = () => {
                     white-space: nowrap;
                 }
 
+
                 .remove-btn {
                     flex-shrink: 0;
                     width: 28px; height: 28px;
@@ -339,6 +345,30 @@ const DepartmentPage = () => {
                     font-size: 13.5px;
                 }
                 .empty-icon { margin-bottom: 12px; opacity: 0.5; }
+
+                 .ghost-btn {
+          background: none;
+          border: 1px solid rgba(237,231,217,0.18);
+          color: #A7A093;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 10px;
+          letter-spacing: 0.06em;
+          border-radius: 2px;
+          padding: 5px 9px;
+          cursor: pointer;
+          white-space: nowrap;
+          transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+        }
+        .ghost-btn:hover {
+          border-color: #C9A227;
+          color: #C9A227;
+          background: rgba(201,162,39,0.08);
+        }
+        .ghost-btn.departments:hover {
+          border-color: #6B8F71;
+          color: #6B8F71;
+          background: rgba(107,143,113,0.08);
+        }
 
                 .skeleton-row {
                     display: flex;
@@ -386,7 +416,7 @@ const DepartmentPage = () => {
                         <label className="field-label" htmlFor="dept-name">
                             Department name
                         </label>
-                        
+
                         <input
                             id="dept-name"
                             className="input"
@@ -435,6 +465,9 @@ const DepartmentPage = () => {
                                 <div className="roster-row" key={item._id}>
                                     <div className="dept-icon">{deptInitial(item.name)}</div>
                                     <span className="dept-name">{item.name}</span>
+                                    <button className="ghost-btn" onClick={() => handlePage(item._id)}>
+                                        BOARDS
+                                    </button>
                                     <button
                                         className="remove-btn"
                                         onClick={() => deleteDept(item._id)}
@@ -446,10 +479,13 @@ const DepartmentPage = () => {
                                             <line x1="6" y1="6" x2="18" y2="18" />
                                         </svg>
                                     </button>
+
                                 </div>
                             ))
                         )}
                     </div>
+
+
                 </div>
             </div>
         </div>
