@@ -1,42 +1,41 @@
+import "dotenv/config";
 import express from "express";
-import jwt from "jsonwebtoken";
-import cookieParser from "cookie-parser";
 import cors from "cors";
-import dotenv from "dotenv";
-import connectDB from "../server/config/db.js";
+import connectDB from "./config/db.js";
 
 import boardRouter from "./routes/boardRouter.js";
 import organizationRouter from "./routes/organizationRouter.js";
 import userRouter from "./routes/userRouter.js";
 import cardRouter from "./routes/cardRouter.js";
 import departmentRouter from "./routes/departmentRouter.js";
+import errorHandler from "./middleware/errorHandler.js";
 
-dotenv.config();
-connectDB();
+for (const key of ["MONGO_DB_URI", "JWT_SECRET"]) {
+  if (!process.env[key]) {
+    console.error(`Missing required environment variable: ${key}`);
+    process.exit(1);
+  }
+}
+
+const PORT = process.env.PORT || 3000;
+const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
 
 const app = express();
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-
-const JWTSECRET = process.env.JWT_SECRET;
-
-// app.use(
-//   cors({
-//     credentials: true,
-//     origin: "http://localhost:5173",
-//   }),
-// );
-
-
+app.use(cors({ origin: CLIENT_URL.split(",").map((url) => url.trim()) }));
+app.use(express.json({ limit: "100kb" }));
 
 app.use("/api/boards", boardRouter);
 app.use("/api/organizations", organizationRouter);
-app.use('/api/users', userRouter);
-app.use('/api/cards', cardRouter);
-app.use('/api/departments', departmentRouter);
+app.use("/api/users", userRouter);
+app.use("/api/cards", cardRouter);
+app.use("/api/departments", departmentRouter);
 
-app.listen(3000, () => {
-  console.log("app is listening on port 3000");
+app.use((req, res) => {
+  res.status(404).json({ message: "Route not found" });
+});
+app.use(errorHandler);
+
+await connectDB();
+app.listen(PORT, () => {
+  console.log(`app is listening on port ${PORT}`);
 });

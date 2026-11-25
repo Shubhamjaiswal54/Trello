@@ -1,43 +1,27 @@
+import express from "express";
 import {
   addboard,
   getallboards,
   getboard,
   deleteboard,
 } from "../controller/boardController.js";
-import express from "express";
-const boardRouter = express.Router();
 import auth from "../middleware/auth.js";
 import requireOrgAccess from "../middleware/requireOrgAccess.js";
 import departmentModel from "../models/departmentModel.js";
 
+const boardRouter = express.Router();
+
 async function orgIdFromDept(req) {
-  const dept = await departmentModel.findById(req.params.departmentId);
-  return dept?.orgId;
+  const department = await departmentModel.findById(req.params.departmentId);
+  req.department = department;
+  return department?.orgId;
 }
 
-boardRouter.post(
-  "/:departmentId/create",
-  auth,
-  requireOrgAccess(orgIdFromDept),
-  addboard,
-);
-boardRouter.get(
-  "/:departmentId",
-  auth,
-  requireOrgAccess(orgIdFromDept),
-  getallboards,
-);
-boardRouter.get(
-  "/:departmentId/:boardId",
-  auth,
-  requireOrgAccess(orgIdFromDept),
-  getboard,
-);
-boardRouter.delete(
-  "/:departmentId/:boardId",
-  auth,
-  requireOrgAccess(orgIdFromDept),
-  deleteboard,
-);
+boardRouter.use("/:departmentId", auth, requireOrgAccess(orgIdFromDept));
+
+boardRouter.post("/:departmentId/create", addboard);
+boardRouter.get("/:departmentId", getallboards);
+boardRouter.get("/:departmentId/:boardId", getboard);
+boardRouter.delete("/:departmentId/:boardId", deleteboard);
 
 export default boardRouter;

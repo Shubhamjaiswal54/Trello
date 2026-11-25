@@ -1,17 +1,15 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
+import { clearSession, hasValidSession } from './auth'
 
 const ProtectedRoute = () => {
-  const token = localStorage.getItem('token');
+  const location = useLocation()
 
-  // If there is no token, redirect them to the login page.
-  // The 'replace' prop ensures they don't get stuck in a redirect loop 
-  // if they click the back button in their browser.
-  if (!token) {
-    return <Navigate to="/user/login" replace />;
+  if (!hasValidSession()) {
+    clearSession()
+    return <Navigate to="/user/login" replace state={{ from: location.pathname }} />
   }
 
-  // If a token exists, render the requested page (the child routes)
-  return <Outlet />;
-};
+  return <Outlet />
+}
 
-export default ProtectedRoute;
+export default ProtectedRoute

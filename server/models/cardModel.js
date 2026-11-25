@@ -9,10 +9,13 @@ const cardSchema = new mongoose.Schema(
     text: {
       type: String,
       required: true,
+      trim: true,
+      maxlength: 500,
     },
 
     pos: {
       type: String,
+      default: "",
     },
 
     boardId: {
@@ -23,7 +26,7 @@ const cardSchema = new mongoose.Schema(
     },
     orgId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Organizations",
+      ref: "Organization",
       required: true,
       index: true,
     },

@@ -1,30 +1,20 @@
+import express from "express";
 import {
   addDepartment,
   removeDepartment,
   getDepartment,
 } from "../controller/departmentController.js";
-import express from "express";
-const departmentRouter = express.Router();
 import auth from "../middleware/auth.js";
-import requireOrgAccess from "../middleware/requireOrgAccess.js";
+import requireOrgAccess, {
+  orgFromParam,
+} from "../middleware/requireOrgAccess.js";
 
-departmentRouter.post(
-  "/:organizationId/create",
-  auth,
-  requireOrgAccess((req) => req.params.organizationId),
-  addDepartment,
-);
-departmentRouter.get(
-  "/:organizationId",
-  auth,
-  requireOrgAccess( (req) => req.params.organizationId),
-  getDepartment,
-);
-departmentRouter.delete(
-  "/:organizationId/:departmentId",
-  auth,
-  requireOrgAccess((req) => req.params.organizationId),
-  removeDepartment,
-);
+const departmentRouter = express.Router();
+
+departmentRouter.use("/:organizationId", auth, requireOrgAccess(orgFromParam));
+
+departmentRouter.post("/:organizationId/create", addDepartment);
+departmentRouter.get("/:organizationId", getDepartment);
+departmentRouter.delete("/:organizationId/:departmentId", removeDepartment);
 
 export default departmentRouter;

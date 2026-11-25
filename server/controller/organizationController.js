@@ -1,174 +1,135 @@
-import mongoose from "mongoose";
 import organizationModel from "../models/organizationModel.js";
+import departmentModel from "../models/departmentModel.js";
+import boardModel from "../models/boardModel.js";
+import cardModel from "../models/cardModel.js";
 import userModel from "../models/userModel.js";
 
+const isOwner = (organization, userId) =>
+  organization.owner?.toString() === userId;
+
 const addorganization = async (req, res) => {
-  try {
-    const { name } = req.body;
-
-    if (!name) {
-      return res.status(400).json({ message: "Organization name is required" });
-    }
-
-    const organization = await organizationModel.create({
-      name: name,
-      owner: req.userId,
-      members: [req.userId],
-    });
-
-    res.status(201).json({
-      message: "Organization created successfully",
-      organization,
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  const name = req.body.name?.trim();
+  if (!name) {
+    return res.status(400).json({ message: "Organization name is required" });
   }
+
+  const organization = await organizationModel.create({
+    name,
+    owner: req.userId,
+    members: [req.userId],
+  });
+
+  res.status(201).json({
+    message: "Organization created successfully",
+    organization,
+  });
 };
 
+// Requires requireOrgAccess, which loads req.org.
 const removeOrganization = async (req, res) => {
-  try {
-    const { organizationId } = req.params;
+  const organization = req.org;
 
-    // First, find the org to ensure it exists and the user owns it
-    const organization = await organizationModel.findById(organizationId);
-
-    if (!organization) {
-      return res.status(404).json({ message: "Organization not found" });
-    }
-
-    // Authorization check: Only the owner should be able to delete it
-    if (organization.owner.toString() !== req.userId) {
-      return res
-        .status(403)
-        .json({ message: "Not authorized to delete this organization" });
-    }
-
-    await organizationModel.findByIdAndDelete(organizationId);
-
-    res.status(200).json({
-      message: "Organization deleted successfully",
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  if (!isOwner(organization, req.userId)) {
+    return res
+      .status(403)
+      .json({ message: "Only the owner can delete this organization" });
   }
+
+  await Promise.all([
+    cardModel.deleteMany({ orgId: organization._id }),
+    boardModel.deleteMany({ orgId: organization._id }),
+    departmentModel.deleteMany({ orgId: organization._id }),
+  ]);
+  await organization.deleteOne();
+
+  res.status(200).json({ message: "Organization deleted successfully" });
 };
 
+// Requires requireOrgAccess.
 const getorganization = async (req, res) => {
-  try {
-    const { organizationId } = req.params;
-
-    const organization = await organizationModel
-      .findById(organizationId)
-      .populate("members", "-password")
-      .populate("owner", "-password");
-
-    if (!organization) {
-      return res.status(404).json({ message: "Organization not found" });
-    }
-
-    res.status(200).json({ organization });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+  const organization = await req.org.populate([
+    { path: "members", select: "name email" },
+    { path: "owner", select: "name email" },
+  ]);
+  res.status(200).json({ organization });
 };
 
 const getall = async (req, res) => {
-  try {
-    console.log(req.userId);
-    const organization = await organizationModel.find({owner:req.userId});
-    res.status(200).json({ organization });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+  const organization = await organizationModel
+    .find({ owner: req.userId })
+    .select("name owner members");
+  res.status(200).json({ organization });
 };
-
 
 const getallme = async (req, res) => {
-  try {
-    console.log(req.userId);
-    const organization = await organizationModel.find({members:req.userId}).select("name _id");
-    res.status(200).json({ organization });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+  const organization = await organizationModel
+    .find({ members: req.userId })
+    .select("name owner members")
+    .sort({ createdAt: -1 });
+  res.status(200).json({ organization });
 };
+
+// Requires requireOrgAccess.
 const addmember = async (req, res) => {
-  try {
-    const { organizationId } = req.params;
-    const { email } = req.body;
+  const organization = req.org;
+  const email = req.body.email?.trim().toLowerCase();
 
-    const organization = await organizationModel.findById(organizationId);
-
-    if (!organization) {
-      return res.status(404).json({ message: "Organization not found" });
-    }
-
-    // SAFEGUARD: Added '?.'
-    if (organization.owner?.toString() !== req.userId) {
-      return res.status(403).json({ message: "Not authorized to add members" });
-    }
-
-    const user = await userModel.findOne({ email: email });
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    // SAFEGUARD: Added '?.' to memberId in case there are nulls in the array
-    const isAlreadyMember = organization.members.some(
-      (memberId) => memberId?.toString() === user._id.toString(),
-    );
-
-    if (isAlreadyMember) {
-      return res.status(400).json({ message: "Member already exists" });
-    }
-
-    organization.members.push(user._id);
-    await organization.save();
-
-    res.status(200).json({
-      message: "Member added successfully",
-      organization,
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  if (!isOwner(organization, req.userId)) {
+    return res
+      .status(403)
+      .json({ message: "Only the owner can add members" });
   }
+  if (!email) {
+    return res.status(400).json({ message: "Email is required" });
+  }
+
+  const user = await userModel.findOne({ email });
+  if (!user) {
+    return res
+      .status(404)
+      .json({ message: "No user is registered with that email" });
+  }
+
+  const isAlreadyMember = organization.members.some(
+    (memberId) => memberId?.toString() === user._id.toString(),
+  );
+  if (isAlreadyMember) {
+    return res.status(409).json({ message: "That user is already a member" });
+  }
+
+  organization.members.push(user._id);
+  await organization.save();
+
+  res.status(200).json({
+    message: "Member added successfully",
+    member: { _id: user._id, name: user.name, email: user.email },
+  });
 };
+
+// Requires requireOrgAccess. Owners can remove anyone else; members can leave.
 const removeMember = async (req, res) => {
-  try {
-    const { organizationId, memberId } = req.params;
+  const organization = req.org;
+  const { memberId } = req.params;
 
-    const organization = await organizationModel.findById(organizationId);
-
-    if (!organization) {
-      return res.status(404).json({ message: "Organization not found" });
-    }
-
-    // SAFEGUARD: Added '?.'
-    if (
-      organization.owner?.toString() !== req.userId &&
-      req.userId !== memberId
-    ) {
-      return res
-        .status(403)
-        .json({ message: "Not authorized to remove this member" });
-    }
-
-    // SAFEGUARD: Added '?.' to member in case there are nulls in the array
-    organization.members = organization.members.filter(
-      (member) => member?.toString() !== memberId,
-    );
-
-    await organization.save();
-
-    res.status(200).json({
-      message: "Member removed successfully",
-      organization,
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  if (!isOwner(organization, req.userId) && req.userId !== memberId) {
+    return res
+      .status(403)
+      .json({ message: "Not authorized to remove this member" });
   }
+  if (organization.owner.toString() === memberId) {
+    return res.status(400).json({
+      message: "The owner can't be removed. Delete the organization instead.",
+    });
+  }
+
+  organization.members = organization.members.filter(
+    (member) => member?.toString() !== memberId,
+  );
+  await organization.save();
+
+  res.status(200).json({ message: "Member removed successfully" });
 };
+
 export {
   addmember,
   removeMember,

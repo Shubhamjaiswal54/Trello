@@ -1,0 +1,38 @@
+Backend security
+
+Passwords are now hashed with bcryptjs, and the login token contains only the user ID, never the password.
+Existing accounts with plaintext passwords still work: the password is re-hashed automatically on that user's next login.
+Emails are unique and case-insensitive, and failed logins no longer reveal whether an account exists.
+You can no longer view another organization or reach its departments, boards or cards by mixing IDs in the URL. Cards are always created on the board in the URL, and edits can only change a card's text and position.
+Cross-origin requests are restricted to CLIENT_URL, and the server refuses to start without JWT_SECRET and MONGO_DB_URI.
+Backend bugs
+
+Duplicate departments are blocked, both by a check and by a unique database index.
+Card moves now return the updated card.
+Deleting an organization, department or board also deletes everything under it.
+The owner can't be removed from their own organization, and other members can leave.
+Error responses now use correct status codes, and server errors no longer leak internal details.
+Frontend fixes
+
+Requests no longer fail right after logging in.
+The file-name capitalization bugs that would break a Linux build are fixed, as is the pre-existing type error that made npm run build fail.
+The shadcn theme stylesheet is now actually loaded.
+"Sign out" works, and an expired session sends you to login with a notice.
+The organization list no longer changes after creating one, signup errors show on the form, and pages reload their data when you navigate between items.
+New frontend
+
+Library: shadcn components (cards, dialogs, menus, badges, avatars, breadcrumbs, skeleton loaders, toasts) themed with your existing corkboard colors.
+React Bits: a SpotlightCard glow on tiles, plus the existing dot-field background and typing effect.
+Board: four lanes (Backlog, To do, In progress, Done), each with its own "Add a card" form. You can double-click a card to edit it, and deleting a card shows a toast with Undo.
+Every page: breadcrumbs, confirmation before anything destructive, loading and empty states, and a user menu.
+Roles: owners see Delete and Invite; members see Leave.
+Speed: pages are loaded on demand, so the main bundle dropped from about 730 kB to about 325 kB.
+Before you run it
+
+Environment: create server/.env from server/.env.example. The client reads VITE_API_URL and defaults to http://localhost:3000/api.
+Log in again: everyone has to log in once, because the token format and header changed (it's now Authorization: Bearer …).
+Duplicate emails: if your database already has two accounts with the same email, the new unique index can't be created until you remove one.
+API changes: login and signup now return { token, user }, and the card routes are PATCH and DELETE /api/cards/:boardId/:uuid.
+URLs changed: organizations are under /organizations/:id, departments /departments/:id, boards /boards/:id.
+Organization ID removed from signup: the server never saved it, and joining by ID alone would let anyone into any organization. People join when an owner invites them by email.
+Screenshots from the run are in .screens/, which I added to .gitignore.

@@ -1,381 +1,105 @@
-import { useState } from 'react';
-import { Eye, EyeOff, User as UserIcon, Mail, Lock, ArrowRight } from 'lucide-react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useState, type FormEvent } from 'react'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { ArrowRight, Loader2 } from 'lucide-react'
+import AuthLayout from '@/components/AuthLayout'
+import FormField from '@/components/FormField'
+import { Button } from '@/components/ui/button'
+import { api, getErrorMessage } from '@/lib/api'
+import { setSession, type SessionUser } from '@/lib/auth'
 
-type Errors = Partial<Record<'email' | 'password', string>>;
+type Errors = Partial<Record<'email' | 'password', string>>
+
+function validate(email: string, password: string): Errors {
+  const errs: Errors = {}
+  if (!email.trim()) errs.email = 'Enter your email'
+  else if (!/^\S+@\S+\.\S+$/.test(email)) errs.email = 'Enter a valid email'
+  if (!password) errs.password = 'Enter your password'
+  return errs
+}
 
 const LoginPage = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
-    const [touched, setTouched] = useState<Record<string, boolean>>({});
-    const [submitting, setSubmitting] = useState(false);
-    const [formError, setFormError] = useState('');
-    
-    const baseURL = 'http://localhost:3000';
-    const navigate = useNavigate();
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [params] = useSearchParams()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showErrors, setShowErrors] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [formError, setFormError] = useState(
+    params.get('expired') ? 'Your session expired. Please sign in again.' : '',
+  )
 
-    const validate = (): Errors => {
-        const errs: Errors = {};
-        if (!email.trim()) errs.email = 'Enter your email';
-        else if (!/^\S+@\S+\.\S+$/.test(email)) errs.email = 'Enter a valid email';
-        
-        if (!password) errs.password = 'Enter a password';
-        else if (password.length < 8) errs.password = 'Use at least 8 characters';
-        
-        return errs;
-    };
+  const errors = validate(email, password)
 
-    const errors = validate();
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    setShowErrors(true)
+    if (Object.keys(errors).length > 0) return
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setTouched({ email: true, password: true });
-        
-        if (Object.keys(errors).length > 0) return;
+    setSubmitting(true)
+    setFormError('')
+    try {
+      const { data } = await api.post<{ token: string; user: SessionUser }>('/users/login', {
+        email,
+        password,
+      })
+      setSession(data.token, data.user)
+      const from = (location.state as { from?: string } | null)?.from
+      navigate(from ?? '/organizations', { replace: true })
+    } catch (err) {
+      setFormError(getErrorMessage(err, 'Could not sign you in. Try again.'))
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
-        setSubmitting(true);
-        setFormError('');
-        try {
-            const response = await axios.post(baseURL + '/api/users/login', {
-                email,
-                password,
-            });
+  return (
+    <AuthLayout
+      title="Welcome back"
+      description="Sign in to pick up where you left off."
+      footer={
+        <>
+          New here?{' '}
+          <Link to="/user/register" className="font-medium text-foreground underline-offset-4 hover:underline">
+            Create an account
+          </Link>
+        </>
+      }
+    >
+      <form onSubmit={handleSubmit} noValidate className="grid gap-4">
+        {formError && (
+          <div role="alert" className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {formError}
+          </div>
+        )}
+        <FormField
+          id="email"
+          label="Email"
+          type="email"
+          autoComplete="email"
+          placeholder="you@example.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          error={showErrors ? errors.email : undefined}
+        />
+        <FormField
+          id="password"
+          label="Password"
+          type="password"
+          autoComplete="current-password"
+          placeholder="Your password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          error={showErrors ? errors.password : undefined}
+        />
+        <Button type="submit" size="lg" className="mt-1 w-full" disabled={submitting}>
+          {submitting ? <Loader2 className="animate-spin" /> : null}
+          {submitting ? 'Signing in…' : 'Sign in'}
+          {!submitting && <ArrowRight />}
+        </Button>
+      </form>
+    </AuthLayout>
+  )
+}
 
-            if (response.status === 200) {
-                const token = response.data;
-                localStorage.setItem('token', token);
-                console.log("hello from login", response.data);
-                navigate('/organizations');
-            } else {
-                console.error('Login error:', response.data);
-                setFormError('Invalid credentials. Please try again.');
-            }
-        } catch (err) {
-            console.error('Error logging in:', err);
-            setFormError('Could not log into your account. Check your details and try again.');
-        } finally {
-            setSubmitting(false);
-        }
-    };
-
-    const fieldError = (key: keyof Errors) => !!touched[key] && !!errors[key];
-
-    return (
-        <div className="enroll-root">
-            <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
-
-                * { box-sizing: border-box; }
-
-                .enroll-root {
-                    min-height: 100vh;
-                    background: #1b2129; /* Matched Home bg */
-                    background-image:
-                        radial-gradient(circle at 10% 5%, rgba(91,126,163,0.08), transparent 45%), /* #5b7ea3 */
-                        radial-gradient(circle at 95% 95%, rgba(122,155,116,0.08), transparent 40%); /* #7a9b74 */
-                    color: #eef1f5; /* Matched Home text */
-                    font-family: 'Inter', sans-serif;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    padding: 32px 20px;
-                }
-                .enroll-shell {
-                    width: 100%;
-                    max-width: 920px;
-                    display: grid;
-                    grid-template-columns: 300px 1fr;
-                    border: 1px solid rgba(91,126,163,0.2);
-                    border-radius: 3px;
-                    overflow: hidden;
-                    background: #232b36; /* Matched Home step card bg */
-                }
-                @media (max-width: 760px) {
-                    .enroll-shell { grid-template-columns: 1fr; }
-                    .enroll-preview { display: none; }
-                }
-
-                /* Left: preview panel */
-                .enroll-preview {
-                    background: #1b2129;
-                    border-right: 1px solid rgba(91,126,163,0.15);
-                    padding: 32px 28px;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: space-between;
-                }
-                .eyebrow {
-                    font-family: 'JetBrains Mono', monospace;
-                    font-size: 11px;
-                    letter-spacing: 0.18em;
-                    color: #5b7ea3; /* Matched Home accent */
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    margin-bottom: 16px;
-                }
-                .eyebrow-dot {
-                    width: 6px; height: 6px; border-radius: 50%;
-                    background: #7a9b74; /* Matched Home secondary accent */
-                    box-shadow: 0 0 0 3px rgba(122,155,116,0.18);
-                }
-                .preview-heading {
-                    font-family: 'Fraunces', serif;
-                    font-weight: 600;
-                    font-size: 24px;
-                    line-height: 1.3;
-                    margin: 0 0 10px;
-                }
-                .preview-copy {
-                    color: #8b93a1; /* Matched Home muted text */
-                    font-size: 13px;
-                    line-height: 1.6;
-                    margin: 0;
-                }
-                .preview-card {
-                    margin-top: 28px;
-                    background: #232b36;
-                    border: 1px solid rgba(238,241,245,0.1);
-                    border-radius: 3px;
-                    padding: 18px;
-                }
-                .preview-id-row {
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                    min-width: 0;
-                }
-                .preview-seal {
-                    flex-shrink: 0;
-                    width: 38px; height: 38px;
-                    border-radius: 50%;
-                    border: 1.5px solid #5b7ea3;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    color: #5b7ea3;
-                }
-                .preview-name {
-                    font-size: 14px;
-                    color: #eef1f5;
-                    font-weight: 500;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
-                }
-                .preview-email {
-                    font-size: 12px;
-                    color: #8b93a1;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
-                }
-                .preview-footnote {
-                    margin-top: 24px;
-                    color: #6b7280;
-                    font-size: 11px;
-                    line-height: 1.5;
-                }
-
-                /* Right: form panel */
-                .enroll-form-panel { padding: 36px 34px; }
-                .form-title {
-                    font-family: 'Fraunces', serif;
-                    font-weight: 600;
-                    font-size: 26px;
-                    margin: 0 0 6px;
-                }
-                .form-subtitle {
-                    color: #8b93a1;
-                    font-size: 13px;
-                    margin: 0 0 26px;
-                }
-                .field-group { margin-bottom: 16px; }
-                .field-label {
-                    display: block;
-                    font-family: 'JetBrains Mono', monospace;
-                    font-size: 11px;
-                    letter-spacing: 0.08em;
-                    color: #8b93a1;
-                    margin-bottom: 7px;
-                }
-                .field-wrap { position: relative; }
-                .field-icon {
-                    position: absolute;
-                    left: 12px;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    color: #8b93a1;
-                    pointer-events: none;
-                }
-                .field-input {
-                    width: 100%;
-                    background: #1b2129;
-                    border: 1px solid rgba(238,241,245,0.16);
-                    border-radius: 2px;
-                    padding: 11px 12px 11px 38px;
-                    color: #eef1f5;
-                    font-family: 'Inter', sans-serif;
-                    font-size: 14px;
-                    outline: none;
-                    transition: border-color 0.15s ease, box-shadow 0.15s ease;
-                }
-                .field-input::placeholder { color: #6b7280; }
-                .field-input:focus {
-                    border-color: #5b7ea3;
-                    box-shadow: 0 0 0 3px rgba(91,126,163,0.15);
-                }
-                .field-input.has-error {
-                    border-color: #d1495b; /* Using Home gradient red */
-                }
-                .field-input.has-error:focus {
-                    box-shadow: 0 0 0 3px rgba(209,73,91,0.15);
-                }
-                .toggle-visibility {
-                    position: absolute;
-                    right: 10px;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    background: none;
-                    border: none;
-                    color: #8b93a1;
-                    cursor: pointer;
-                    padding: 4px;
-                    display: flex;
-                }
-                .toggle-visibility:hover { color: #eef1f5; }
-                .field-error {
-                    margin-top: 6px;
-                    font-size: 12px;
-                    color: #d1495b;
-                }
-                .submit-btn {
-                    margin-top: 6px;
-                    width: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 8px;
-                    background: #5b7ea3; /* Matched Home button bg */
-                    color: #101418; /* Matched Home button text */
-                    border: none;
-                    border-radius: 2px;
-                    padding: 12px 14px;
-                    font-family: 'Inter', sans-serif;
-                    font-weight: 600;
-                    font-size: 14px;
-                    cursor: pointer;
-                    transition: opacity 0.15s ease, transform 0.1s ease;
-                }
-                .submit-btn:hover:not(:disabled) { opacity: 0.9; }
-                .submit-btn:active:not(:disabled) { transform: translateY(1px); }
-                .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-                .submit-btn:focus-visible,
-                .field-input:focus-visible,
-                .toggle-visibility:focus-visible {
-                    outline: 2px solid #5b7ea3;
-                    outline-offset: 2px;
-                }
-                .form-error-banner {
-                    margin-bottom: 16px;
-                    font-size: 13px;
-                    color: #d1495b;
-                    background: rgba(209,73,91,0.1);
-                    border: 1px solid rgba(209,73,91,0.3);
-                    border-radius: 2px;
-                    padding: 10px 12px;
-                }
-            `}</style>
-
-            <div className="enroll-shell">
-                <div className="enroll-preview">
-                    <div>
-                        <div className="eyebrow">
-                            <span className="eyebrow-dot" />
-                            SECURE LOGIN
-                        </div>
-                        <h2 className="preview-heading">Welcome Back</h2>
-                        <p className="preview-copy">Access your organization's dashboard.</p>
-
-                        <div className="preview-card">
-                            <div className="preview-id-row">
-                                <div className="preview-seal">
-                                    <UserIcon size={16} />
-                                </div>
-                                <div style={{ minWidth: 0 }}>
-                                    <p className="preview-name">User Account</p>
-                                    <p className="preview-email">{email.trim() || 'you@example.com'}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <p className="preview-footnote">Protected by standard encryption.</p>
-                </div>
-
-                <div className="enroll-form-panel">
-                    <h1 className="form-title">Login to Account</h1>
-                    <p className="form-subtitle">Fill in your details to continue.</p>
-
-                    {formError && <div className="form-error-banner">{formError}</div>}
-
-                    <form onSubmit={handleSubmit} noValidate>
-                        <div className="field-group">
-                            <label htmlFor="email" className="field-label">EMAIL</label>
-                            <div className="field-wrap">
-                                <Mail size={16} className="field-icon" />
-                                <input
-                                    id="email"
-                                    type="email"
-                                    placeholder="you@example.com"
-                                    name="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    onBlur={() => setTouched((t) => ({ ...t, email: true }))}
-                                    className={`field-input${fieldError('email') ? ' has-error' : ''}`}
-                                />
-                            </div>
-                            {fieldError('email') && <p className="field-error">{errors.email}</p>}
-                        </div>
-
-                        <div className="field-group">
-                            <label htmlFor="password" className="field-label">PASSWORD</label>
-                            <div className="field-wrap">
-                                <Lock size={16} className="field-icon" />
-                                <input
-                                    id="password"
-                                    type={showPassword ? 'text' : 'password'}
-                                    placeholder="At least 8 characters"
-                                    name="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    onBlur={() => setTouched((t) => ({ ...t, password: true }))}
-                                    className={`field-input${fieldError('password') ? ' has-error' : ''}`}
-                                    style={{ paddingRight: 38 }}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword((s) => !s)}
-                                    className="toggle-visibility"
-                                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                                >
-                                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                                </button>
-                            </div>
-                            {fieldError('password') && <p className="field-error">{errors.password}</p>}
-                        </div>
-
-                        <button type="submit" disabled={submitting} className="submit-btn">
-                            {submitting ? 'Authenticating...' : 'Sign In'}
-                            {!submitting && <ArrowRight size={16} />}
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-export default LoginPage;
+export default LoginPage

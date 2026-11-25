@@ -1,32 +1,33 @@
 import organizationModel from "../models/organizationModel.js";
 
+// getOrgId resolves the organization that owns the requested resource,
+// or undefined when the resource itself doesn't exist.
 function requireOrgAccess(getOrgId) {
-
   return async (req, res, next) => {
-    try {
-      //here orgid is an arrow funtion that calls either 
-      const orgId = await getOrgId(req);
-
-      const organization = await organizationModel.findById(orgId);
-      console.log(orgId +" <-- org id is");
-      console.log(organization)
-      if (!organization) {
-        return res.status(404).send({ message: "organization not found here " });
-      }
-
-      const memberExists = organization.members.some(
-        (memberId) => memberId?.toString() === req.userId,
-      );
-
-      if (!memberExists) {
-        return res.status(400).json({ message: "Member does not exists" });
-      }
-      req.org = organization;
-
-      next();
-    } catch (error) {
-      res.status(500).json({ message: error.message });
+    const orgId = await getOrgId(req);
+    if (!orgId) {
+      return res.status(404).json({ message: "Not found" });
     }
+
+    const organization = await organizationModel.findById(orgId);
+    if (!organization) {
+      return res.status(404).json({ message: "Organization not found" });
+    }
+
+    const isMember = organization.members.some(
+      (memberId) => memberId?.toString() === req.userId,
+    );
+    if (!isMember) {
+      return res
+        .status(403)
+        .json({ message: "You are not a member of this organization" });
+    }
+
+    req.org = organization;
+    next();
   };
 }
+
+export const orgFromParam = (req) => req.params.organizationId;
+
 export default requireOrgAccess;
